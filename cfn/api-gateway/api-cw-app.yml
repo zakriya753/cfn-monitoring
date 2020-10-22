@@ -1,0 +1,80 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: cfn api gateway alarms
+Parameters:
+  awsEnv:
+    Type: String
+    Default: dev
+  snsTopicAlarmArn:
+    Type: String
+  apiName:
+    Type: String          
+Resources:         
+  # api gateway Alarms
+  api4XXErrorAlert:
+    Type: 'AWS::CloudWatch::Alarm'
+    Properties:
+      AlarmName: !Sub ${apiName}-4XXError-alert-${awsEnv}
+      AlarmDescription: !Sub ${apiName}-4XXError-alert-${awsEnv}
+      AlarmActions:
+        - !Ref snsTopicAlarmArn
+      MetricName: "4XXError"
+      Namespace: "AWS/ApiGateway"
+      Statistic: "Sum"
+      Period: 60
+      EvaluationPeriods: 5
+      Threshold: 10
+      ComparisonOperator: GreaterThanThreshold
+      Dimensions:
+        - Name: ApiName
+          Value: !Ref apiName
+  api5XXErrorAlert:
+    Type: 'AWS::CloudWatch::Alarm'
+    Properties:
+      AlarmName: !Sub ${apiName}-5XXError-alert-${awsEnv}
+      AlarmDescription: !Sub ${apiName}-5XXError-alert-${awsEnv}
+      AlarmActions:
+        - !Ref snsTopicAlarmArn
+      MetricName: "5XXError"
+      Namespace: "AWS/ApiGateway"
+      Statistic: "Sum"
+      Period: 60
+      EvaluationPeriods: 5
+      Threshold: 10
+      ComparisonOperator: GreaterThanThreshold
+      Dimensions:
+        - Name: ApiName
+          Value: !Ref apiName
+  apiCacheMissAlert:
+    Type: 'AWS::CloudWatch::Alarm'
+    Properties:
+      AlarmName: !Sub ${apiName}-cachemiss-alert-${awsEnv}
+      AlarmDescription: !Sub ${apiName}-cachemiss-alert-${awsEnv}
+      AlarmActions:
+        - !Ref snsTopicAlarmArn
+      MetricName: "CacheMissCount"
+      Namespace: "AWS/ApiGateway"
+      Statistic: "Sum"
+      Period: 60
+      EvaluationPeriods: 5
+      Threshold: 50
+      ComparisonOperator: GreaterThanThreshold
+      Dimensions:
+        - Name: ApiName
+          Value: !Ref apiName
+  apiIntegrationLatencyAlert:
+    Type: 'AWS::CloudWatch::Alarm'
+    Properties:
+      AlarmName: !Sub ${apiName}-integrationlatency-alert-${awsEnv}
+      AlarmDescription: !Sub ${apiName}-integrationlatency-alert-${awsEnv}
+      AlarmActions:
+        - !Ref snsTopicAlarmArn
+      MetricName: "IntegrationLatency"
+      Namespace: "AWS/ApiGateway"
+      Statistic: "Sum"
+      Period: 60
+      EvaluationPeriods: 5
+      Threshold: 10
+      ComparisonOperator: GreaterThanThreshold
+      Dimensions:
+        - Name: ApiName
+          Value: !Ref apiName                        

@@ -1,0 +1,91 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: cfn api gateway alarms
+Parameters:
+  appName:
+    Type: String
+    Default: cloudfront
+  awsEnv:
+    Type: String
+    Default: dev
+  snsTopicAlarmArn:
+    Type: String
+  distributionId:
+    Type: String          
+Resources:         
+  # cloudfront Alarms
+  cf4xxErrorRateAlert:
+    Type: 'AWS::CloudWatch::Alarm'
+    Properties:
+      AlarmName: !Sub ${appName}-4xxErrorRate-alert-${awsEnv}
+      AlarmDescription: !Sub ${appName}-4xxErrorRate-alert-${awsEnv}
+      AlarmActions:
+        - !Ref snsTopicAlarmArn
+      MetricName: "4xxErrorRate"
+      Namespace: "AWS/CloudFront"
+      Statistic: "Average"
+      Period: 60
+      EvaluationPeriods: 5
+      Threshold: 10
+      ComparisonOperator: GreaterThanThreshold
+      Dimensions:
+        - Name: DistributionId
+          Value: !Ref distributionId
+        - Name: Region
+          Value: Global
+  cf5xxErrorRateAlert:
+    Type: 'AWS::CloudWatch::Alarm'
+    Properties:
+      AlarmName: !Sub ${appName}-5xxErrorRate-alert-${awsEnv}
+      AlarmDescription: !Sub ${appName}-5xxErrorRate-alert-${awsEnv}
+      AlarmActions:
+        - !Ref snsTopicAlarmArn
+      MetricName: "5xxErrorRate"
+      Namespace: "AWS/CloudFront"
+      Statistic: "Average"
+      Period: 60
+      EvaluationPeriods: 5
+      Threshold: 10
+      ComparisonOperator: GreaterThanThreshold
+      Dimensions:
+        - Name: DistributionId
+          Value: !Ref distributionId
+        - Name: Region
+          Value: Global
+  cfRequestsAlert:
+    Type: 'AWS::CloudWatch::Alarm'
+    Properties:
+      AlarmName: !Sub ${appName}-requests-alert-${awsEnv}
+      AlarmDescription: !Sub ${appName}-requests-alert-${awsEnv}
+      AlarmActions:
+        - !Ref snsTopicAlarmArn
+      MetricName: "Requests"
+      Namespace: "AWS/CloudFront"
+      Statistic: "Sum"
+      Period: 60
+      EvaluationPeriods: 5
+      Threshold: 10000
+      ComparisonOperator: GreaterThanThreshold
+      Dimensions:
+        - Name: DistributionId
+          Value: !Ref distributionId
+        - Name: Region
+          Value: Global
+  cfBytesDownloadedAlert:
+    Type: 'AWS::CloudWatch::Alarm'
+    Properties:
+      AlarmName: !Sub ${appName}-bytesdownloaded-alert-${awsEnv}
+      AlarmDescription: !Sub ${appName}-bytesdownloaded-alert-${awsEnv}
+      AlarmActions:
+        - !Ref snsTopicAlarmArn
+      MetricName: "BytesDownloaded"
+      Namespace: "AWS/CloudFront"
+      Statistic: "Sum"
+      Period: 60
+      EvaluationPeriods: 5
+      Threshold: 15000
+      ComparisonOperator: GreaterThanThreshold
+      Dimensions:
+        - Name: DistributionId
+          Value: !Ref distributionId
+        - Name: Region
+          Value: Global                          

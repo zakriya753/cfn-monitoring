@@ -1,0 +1,97 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: cfn dynamo alarms
+Parameters:
+  awsEnv:
+    Type: String
+    Default: dev
+  snsTopicAlarmArn:
+    Type: String
+  dynamoTableName:
+    Type: String          
+Resources:         
+  # Dynamo Alarms
+  dynamoSystemErrorAlert:
+    Type: 'AWS::CloudWatch::Alarm'
+    Properties:
+      AlarmName: !Sub ${dynamoTableName}-system-error-alert-${awsEnv}
+      AlarmDescription: !Sub ${dynamoTableName}-system-error-alert-${awsEnv}
+      AlarmActions:
+        - !Ref snsTopicAlarmArn
+      MetricName: "SystemErrors"
+      Namespace: "AWS/DynamoDB"
+      Statistic: "Sum"
+      Period: 60
+      EvaluationPeriods: 5
+      Threshold: 0
+      ComparisonOperator: GreaterThanThreshold
+      Dimensions:
+        - Name: TableName
+          Value: !Ref dynamoTableName
+  dynamoRCUAlert:
+    Type: 'AWS::CloudWatch::Alarm'
+    Properties:
+      AlarmName: !Sub ${dynamoTableName}-consumed-rcu-alert-${awsEnv}
+      AlarmDescription: !Sub ${dynamoTableName}-consumed-rcu-alert-${awsEnv}
+      AlarmActions:
+        - !Ref snsTopicAlarmArn
+      MetricName: "ConsumedReadCapacityUnits"
+      Namespace: "AWS/DynamoDB"
+      Statistic: "Sum"
+      Period: 60
+      EvaluationPeriods: 5
+      Threshold: 3000
+      ComparisonOperator: GreaterThanThreshold
+      Dimensions:
+        - Name: TableName
+          Value: !Ref dynamoTableName
+  dynamoWCUAlert:
+    Type: 'AWS::CloudWatch::Alarm'
+    Properties:
+      AlarmName: !Sub ${dynamoTableName}-consumed-wcu-alert-${awsEnv}
+      AlarmDescription: !Sub ${dynamoTableName}-consumed-wcu-alert-${awsEnv}
+      AlarmActions:
+        - !Ref snsTopicAlarmArn
+      MetricName: "ConsumedWriteCapacityUnits"
+      Namespace: "AWS/DynamoDB"
+      Statistic: "Sum"
+      Period: 60
+      EvaluationPeriods: 5
+      Threshold: 800
+      ComparisonOperator: GreaterThanThreshold
+      Dimensions:
+        - Name: TableName
+          Value: !Ref dynamoTableName
+  dynamoThrottleAlert:
+    Type: 'AWS::CloudWatch::Alarm'
+    Properties:
+      AlarmName: !Sub ${dynamoTableName}-throttle-alert-${awsEnv}
+      AlarmDescription: !Sub ${dynamoTableName}-throttle-alert-${awsEnv}
+      AlarmActions:
+        - !Ref snsTopicAlarmArn
+      MetricName: "ThrottledRequests"
+      Namespace: "AWS/DynamoDB"
+      Statistic: "Sum"
+      Period: 60
+      EvaluationPeriods: 5
+      Threshold: 20
+      ComparisonOperator: GreaterThanThreshold
+      Dimensions:
+        - Name: TableName
+          Value: !Ref dynamoTableName
+  dynamoUserErrorAlert:
+    Type: 'AWS::CloudWatch::Alarm'
+    Properties:
+      AlarmName: !Sub ${dynamoTableName}-user-error-alert-${awsEnv}
+      AlarmDescription: !Sub ${dynamoTableName}-user-error-alert-${awsEnv}
+      AlarmActions:
+        - !Ref snsTopicAlarmArn
+      MetricName: "UserErrors"
+      Namespace: "AWS/DynamoDB"
+      Statistic: "Sum"
+      Period: 60
+      EvaluationPeriods: 5
+      Threshold: 0
+      ComparisonOperator: GreaterThanThreshold
+      Dimensions:
+        - Name: TableName
+          Value: !Ref dynamoTableName                                

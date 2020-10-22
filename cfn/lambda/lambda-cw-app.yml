@@ -1,0 +1,97 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: cfn lambda alarms
+Parameters:
+  awsEnv:
+    Type: String
+    Default: dev
+  snsTopicAlarmArn:
+    Type: String
+  lambdaFunctionName:
+    Type: String          
+Resources:         
+  # Lambda Alarms
+  lambdaErrorAlert:
+    Type: 'AWS::CloudWatch::Alarm'
+    Properties:
+      AlarmName: !Sub ${lambdaFunctionName}-error-alert-${awsEnv}
+      AlarmDescription: !Sub ${lambdaFunctionName}-error-alert-${awsEnv}
+      AlarmActions:
+        - !Ref snsTopicAlarmArn
+      MetricName: "Errors"
+      Namespace: "AWS/Lambda"
+      Statistic: "Sum"
+      Period: 60
+      EvaluationPeriods: 5
+      Threshold: 0
+      ComparisonOperator: GreaterThanThreshold
+      Dimensions:
+        - Name: FunctionName
+          Value: !Ref lambdaFunctionName
+  lambdaThrottleAlert:
+    Type: 'AWS::CloudWatch::Alarm'
+    Properties:
+      AlarmName: !Sub ${lambdaFunctionName}-throttle-alert-${awsEnv}
+      AlarmDescription: !Sub ${lambdaFunctionName}-throttle-alert-${awsEnv}
+      AlarmActions:
+        - !Ref snsTopicAlarmArn
+      MetricName: "Throttles"
+      Namespace: "AWS/Lambda"
+      Statistic: "Sum"
+      Period: 60
+      EvaluationPeriods: 5
+      Threshold: 0
+      ComparisonOperator: GreaterThanThreshold
+      Dimensions:
+        - Name: FunctionName
+          Value: !Ref lambdaFunctionName
+  lambdaInvocationAlert:
+    Type: 'AWS::CloudWatch::Alarm'
+    Properties:
+      AlarmName: !Sub ${lambdaFunctionName}-invocations-alert-${awsEnv}
+      AlarmDescription: !Sub ${lambdaFunctionName}-invocations-alert-${awsEnv}
+      AlarmActions:
+        - !Ref snsTopicAlarmArn
+      MetricName: "Invocations"
+      Namespace: "AWS/Lambda"
+      Statistic: "Sum"
+      Period: 60
+      EvaluationPeriods: 5
+      Threshold: 1000
+      ComparisonOperator: GreaterThanThreshold
+      Dimensions:
+        - Name: FunctionName
+          Value: !Ref lambdaFunctionName
+  lambdaDurationAlert:
+    Type: 'AWS::CloudWatch::Alarm'
+    Properties:
+      AlarmName: !Sub ${lambdaFunctionName}-duration-alert-${awsEnv}
+      AlarmDescription: !Sub ${lambdaFunctionName}-duration-alert-${awsEnv}
+      AlarmActions:
+        - !Ref snsTopicAlarmArn
+      MetricName: "Duration"
+      Namespace: "AWS/Lambda"
+      Statistic: "Average"
+      Period: 60
+      EvaluationPeriods: 5
+      Threshold: 300000
+      ComparisonOperator: GreaterThanThreshold
+      Dimensions:
+        - Name: FunctionName
+          Value: !Ref lambdaFunctionName                 
+Outputs:
+  lambdaErrorAlert:
+    Value: !Ref lambdaErrorAlert
+    Export:
+      Name: !Sub "${lambdaFunctionName}-lambdaErrorAlert-${awsEnv}"
+  lambdaDurationAlert:
+    Value: !Ref lambdaDurationAlert
+    Export:
+      Name: !Sub "${lambdaFunctionName}-lambdaDurationAlert-${awsEnv}"
+  lambdaInvocationAlert:
+    Value: !Ref lambdaInvocationAlert
+    Export:
+      Name: !Sub "${lambdaFunctionName}-lambdaInvocationAlert-${awsEnv}"
+  lambdaThrottleAlert:
+    Value: !Ref lambdaThrottleAlert
+    Export:
+      Name: !Sub "${lambdaFunctionName}-lambdaThrottleAlert-${awsEnv}"             
