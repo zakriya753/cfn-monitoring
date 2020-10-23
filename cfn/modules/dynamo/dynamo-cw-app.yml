@@ -64,8 +64,8 @@ Resources:
   dynamoThrottleAlert:
     Type: 'AWS::CloudWatch::Alarm'
     Properties:
-      AlarmName: !Sub ${dynamoTableName}-throttle-alert-${awsEnv}
-      AlarmDescription: !Sub ${dynamoTableName}-throttle-alert-${awsEnv}
+      AlarmName: !Sub ${dynamoTableName}-dynamo-throttle-alert-${awsEnv}
+      AlarmDescription: !Sub ${dynamoTableName}-dynamo-throttle-alert-${awsEnv}
       AlarmActions:
         - !Ref snsTopicAlarmArn
       MetricName: "ThrottledRequests"

@@ -1,0 +1,43 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: "Serverless Monitoring Main"
+Parameters:
+  awsEnv:
+    Type: String
+  s3ArtifactPath:
+    Type: String
+    Description: "Enter the artifact bucket path"
+Resources:
+  apiAlarms:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: !Sub "https://s3.amazonaws.com/${s3ArtifactPath}/api-gateway/api-cw-app.yml"
+      Parameters:
+        awsEnv: !Ref awsEnv
+        apiName: "serverless-monitor-test"
+        snsTopicAlarmArn: "arn:aws:sns:us-east-1:947344745710:serverless-monitor-test"
+  cloudfrontAlarms:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: !Sub "https://s3.amazonaws.com/${s3ArtifactPath}/cloudfront/cf-cw-app.yml"
+      Parameters:
+        awsEnv: !Ref awsEnv
+        appName: "cloudfront"
+        distributionId: "E38NBZQVQKR95Z"
+        snsTopicAlarmArn: "arn:aws:sns:us-east-1:947344745710:serverless-monitor-test"
+  dynamoAlarms:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: !Sub "https://s3.amazonaws.com/${s3ArtifactPath}/dynamo/dynamo-cw-app.yml"
+      Parameters:
+        awsEnv: !Ref awsEnv
+        dynamoTableName: "serverless-monitor-test"
+        snsTopicAlarmArn: "arn:aws:sns:us-east-1:947344745710:serverless-monitor-test"
+  lambdaAlarms:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: !Sub "https://s3.amazonaws.com/${s3ArtifactPath}/lambda/lambda-cw-app.yml"
+      Parameters:
+        awsEnv: !Ref awsEnv
+        lambdaFunctionName: "serverless-monitor-test"
+        snsTopicAlarmArn: "arn:aws:sns:us-east-1:947344745710:serverless-monitor-test"                  
+          
