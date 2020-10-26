@@ -1,0 +1,46 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: cfn sns alarms
+Parameters:
+  awsEnv:
+    Type: String
+    Default: dev
+  snsTopicAlarmArn:
+    Type: String
+  snsTopicName:
+    Type: String          
+Resources:         
+  # SNS Alarms
+  snsNumberOfMessagesAlert:
+    Type: 'AWS::CloudWatch::Alarm'
+    Properties:
+      AlarmName: !Sub ${snsTopicName}-messages-publish-alert-${awsEnv}
+      AlarmDescription: !Sub ${snsTopicName}-messages-publish-alert-${awsEnv}
+      AlarmActions:
+        - !Ref snsTopicAlarmArn
+      MetricName: "NumberOfMessagesPublished"
+      Namespace: "AWS/SNS"
+      Statistic: "Sum"
+      Period: 60
+      EvaluationPeriods: 5
+      Threshold: 10000
+      ComparisonOperator: GreaterThanThreshold
+      Dimensions:
+        - Name: TopicName
+          Value: !Ref snsTopicName
+  snsNumberOfNotificationsFailed:
+    Type: 'AWS::CloudWatch::Alarm'
+    Properties:
+      AlarmName: !Sub ${snsTopicName}-messages-failed-alert-${awsEnv}
+      AlarmDescription: !Sub ${snsTopicName}-messages-failed-alert-${awsEnv}
+      AlarmActions:
+        - !Ref snsTopicAlarmArn
+      MetricName: "NumberOfNotificationsFailed"
+      Namespace: "AWS/SNS"
+      Statistic: "Sum"
+      Period: 60
+      EvaluationPeriods: 5
+      Threshold: 10
+      ComparisonOperator: GreaterThanThreshold
+      Dimensions:
+        - Name: TopicName
+          Value: !Ref snsTopicName        

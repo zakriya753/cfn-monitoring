@@ -6,6 +6,7 @@ Strategy
 Cfn Folder:
 - The main folder has the driver file which is used to create all the alarms by invoking the child stacks in modules.
 - The main can be extended to add more resources, for one it is done one resource per server.
+- The values are dummy in main for now, you can pass actual resources names for monitoring
 Example:
 - module file of lambda implements 4 most used metric alarms and it is drived based on lambdaFunctionName parameter and awsEnv.
 - The main file invokes lambda child template with lambdaFunctionName which integrates the alarms with that particular function.

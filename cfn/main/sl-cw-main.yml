@@ -39,5 +39,29 @@ Resources:
       Parameters:
         awsEnv: !Ref awsEnv
         lambdaFunctionName: "serverless-monitor-test"
-        snsTopicAlarmArn: !Sub "arn:aws:sns:${AWS::Region}:${AWS::AccountId}:serverless-monitor-test"                  
+        snsTopicAlarmArn: !Sub "arn:aws:sns:${AWS::Region}:${AWS::AccountId}:serverless-monitor-test"
+  s3Alarms:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: !Sub "https://s3.amazonaws.com/${s3ArtifactPath}/s3/s3-cw-app.yml"
+      Parameters:
+        awsEnv: !Ref awsEnv
+        s3BucketName: "serverless-monitor-test"
+        snsTopicAlarmArn: !Sub "arn:aws:sns:${AWS::Region}:${AWS::AccountId}:serverless-monitor-test"
+  sqsAlarms:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: !Sub "https://s3.amazonaws.com/${s3ArtifactPath}/sqs/sqs-cw-app.yml"
+      Parameters:
+        awsEnv: !Ref awsEnv
+        sqsQueueName: "serverless-monitor-test"
+        snsTopicAlarmArn: !Sub "arn:aws:sns:${AWS::Region}:${AWS::AccountId}:serverless-monitor-test"
+  snsAlarms:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: !Sub "https://s3.amazonaws.com/${s3ArtifactPath}/sns/sns-cw-app.yml"
+      Parameters:
+        awsEnv: !Ref awsEnv
+        snsTopicName: "serverless-monitor-test"
+        snsTopicAlarmArn: !Sub "arn:aws:sns:${AWS::Region}:${AWS::AccountId}:serverless-monitor-test"                                    
           

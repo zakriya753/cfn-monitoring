@@ -1,0 +1,63 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: cfn s3 alarms
+Parameters:
+  awsEnv:
+    Type: String
+    Default: dev
+  snsTopicAlarmArn:
+    Type: String
+  s3BucketName:
+    Type: String          
+Resources:         
+  # S3 Alarms
+  s3GetRequests:
+    Type: 'AWS::CloudWatch::Alarm'
+    Properties:
+      AlarmName: !Sub ${s3BucketName}-get-requests-alert-${awsEnv}
+      AlarmDescription: !Sub ${s3BucketName}-get-requests-alert-${awsEnv}
+      AlarmActions:
+        - !Ref snsTopicAlarmArn
+      MetricName: "GetRequests"
+      Namespace: "AWS/S3"
+      Statistic: "Sum"
+      Period: 60
+      EvaluationPeriods: 5
+      Threshold: 10000
+      ComparisonOperator: GreaterThanThreshold
+      Dimensions:
+        - Name: BucketName
+          Value: !Ref s3BucketName
+  s35xxErrors:
+    Type: 'AWS::CloudWatch::Alarm'
+    Properties:
+      AlarmName: !Sub ${s3BucketName}-5xxErrors-alert-${awsEnv}
+      AlarmDescription: !Sub ${s3BucketName}-5xxErrors-alert-${awsEnv}
+      AlarmActions:
+        - !Ref snsTopicAlarmArn
+      MetricName: "5xxErrors"
+      Namespace: "AWS/S3"
+      Statistic: "Sum"
+      Period: 60
+      EvaluationPeriods: 5
+      Threshold: 10
+      ComparisonOperator: GreaterThanThreshold
+      Dimensions:
+        - Name: BucketName
+          Value: !Ref s3BucketName
+  s34xxErrors:
+    Type: 'AWS::CloudWatch::Alarm'
+    Properties:
+      AlarmName: !Sub ${s3BucketName}-4xxErrors-alert-${awsEnv}
+      AlarmDescription: !Sub ${s3BucketName}-4xxErrors-alert-${awsEnv}
+      AlarmActions:
+        - !Ref snsTopicAlarmArn
+      MetricName: "4xxErrors"
+      Namespace: "AWS/S3"
+      Statistic: "Sum"
+      Period: 60
+      EvaluationPeriods: 5
+      Threshold: 10
+      ComparisonOperator: GreaterThanThreshold
+      Dimensions:
+        - Name: BucketName
+          Value: !Ref s3BucketName                

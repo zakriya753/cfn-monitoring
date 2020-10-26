@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: 2010-09-09
-Description: cfn dynamo alarms
+Description: cfn sqs alarms
 Parameters:
   awsEnv:
     Type: String
