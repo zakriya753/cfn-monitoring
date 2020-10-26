@@ -1,0 +1,63 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: cfn dynamo alarms
+Parameters:
+  awsEnv:
+    Type: String
+    Default: dev
+  snsTopicAlarmArn:
+    Type: String
+  sqsQueueName:
+    Type: String          
+Resources:         
+  # SQS Alarms
+  sqsNumberOfMessagesAlert:
+    Type: 'AWS::CloudWatch::Alarm'
+    Properties:
+      AlarmName: !Sub ${sqsQueueName}-messages-number-alert-${awsEnv}
+      AlarmDescription: !Sub ${sqsQueueName}-messages-number-alert-${awsEnv}
+      AlarmActions:
+        - !Ref snsTopicAlarmArn
+      MetricName: "NumberOfMessagesSent"
+      Namespace: "AWS/SQS"
+      Statistic: "Sum"
+      Period: 60
+      EvaluationPeriods: 5
+      Threshold: 2
+      ComparisonOperator: GreaterThanThreshold
+      Dimensions:
+        - Name: QueueName
+          Value: !Ref sqsQueueName
+  sqsApproximateAgeOfOldestMessage:
+    Type: 'AWS::CloudWatch::Alarm'
+    Properties:
+      AlarmName: !Sub ${sqsQueueName}-messages-age-alert-${awsEnv}
+      AlarmDescription: !Sub ${sqsQueueName}-messages-age-alert-${awsEnv}
+      AlarmActions:
+        - !Ref snsTopicAlarmArn
+      MetricName: "ApproximateAgeOfOldestMessage"
+      Namespace: "AWS/SQS"
+      Statistic: "Sum"
+      Period: 60
+      EvaluationPeriods: 5
+      Threshold: 300
+      ComparisonOperator: GreaterThanThreshold
+      Dimensions:
+        - Name: QueueName
+          Value: !Ref sqsQueueName
+  sqsApproximateNumberOfMessagesVisible:
+    Type: 'AWS::CloudWatch::Alarm'
+    Properties:
+      AlarmName: !Sub ${sqsQueueName}-messages-visibility-alert-${awsEnv}
+      AlarmDescription: !Sub ${sqsQueueName}-messages-visibility-alert-${awsEnv}
+      AlarmActions:
+        - !Ref snsTopicAlarmArn
+      MetricName: "ApproximateNumberOfMessagesVisible"
+      Namespace: "AWS/SQS"
+      Statistic: "Sum"
+      Period: 60
+      EvaluationPeriods: 5
+      Threshold: 1000
+      ComparisonOperator: GreaterThanThreshold
+      Dimensions:
+        - Name: QueueName
+          Value: !Ref sqsQueueName                
