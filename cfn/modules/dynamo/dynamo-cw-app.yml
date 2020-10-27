@@ -94,4 +94,9 @@ Resources:
       ComparisonOperator: GreaterThanThreshold
       Dimensions:
         - Name: TableName
-          Value: !Ref dynamoTableName                                
+          Value: !Ref dynamoTableName
+  cwApiGtwDashboard:
+    Type: "AWS::CloudWatch::Dashboard"
+    Properties:
+      DashboardName: !Sub ${dynamoTableName}-cw-dynamodb-dashboard-${awsEnv}
+      DashboardBody: !Sub '{"widgets":[{"type":"metric","x":0,"y":0,"width":12,"height":6,"properties":{"metrics":[["AWS/DynamoDB","SystemErrors","TableName","${dynamoTableName}"]],"period":60,"stat":"Sum","region":"${AWS::Region}","title":"DynamoDB SystemErrors"}},{"type":"metric","x":12,"y":0,"width":12,"height":6,"properties":{"metrics":[["AWS/DynamoDB","ThrottledRequests","TableName","${dynamoTableName}"]],"period":60,"stat":"Sum","region":"${AWS::Region}","title":"DyanmoDB ThrottledRequests"}},{"type":"metric","x":0,"y":12,"width":12,"height":6,"properties":{"metrics":[["AWS/DynamoDB","ConsumedWriteCapacityUnits","TableName","${dynamoTableName}"]],"period":60,"stat":"Sum","region":"${AWS::Region}","title":"DynamoDB ConsumedWriteCapacityUnits"}}]}'                                        

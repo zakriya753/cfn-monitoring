@@ -77,4 +77,43 @@ Resources:
       ComparisonOperator: GreaterThanThreshold
       Dimensions:
         - Name: ApiName
-          Value: !Ref apiName                        
+          Value: !Ref apiName 
+  # Api Gateway Anamoly
+  apiAnomalyDetectorOnCount:
+    Type: AWS::CloudWatch::AnomalyDetector
+    Properties:
+      MetricName: "Count"
+      Namespace: "AWS/ApiGateway"
+      Stat: Sum
+      Dimensions:
+        - Name: ApiName
+          Value: !Ref apiName
+  apiAnomalyAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmDescription: !Sub ${apiName}-count-alert-${awsEnv}
+      AlarmName: !Sub ${apiName}-count-alert-${awsEnv}
+      AlarmActions:
+        - !Ref snsTopicAlarmArn
+      ComparisonOperator: LessThanLowerOrGreaterThanUpperThreshold
+      EvaluationPeriods: 1
+      Metrics:
+      - Expression: ANOMALY_DETECTION_BAND(m1, 2)
+        Id: ad1
+      - Id: m1
+        MetricStat:
+          Metric:
+            MetricName: Count
+            Namespace: AWS/ApiGateway
+          Period: !!int 86400
+          Stat: Sum
+      ThresholdMetricId: ad1        
+        
+   # CW Dashboard
+  cwApiGtwDashboard:
+    Type: "AWS::CloudWatch::Dashboard"
+    Properties:
+      DashboardName: !Sub ${apiName}-cw-api-gtw-dashboard-${awsEnv}
+      DashboardBody: !Sub '{"widgets":[{"type":"metric","x":0,"y":0,"width":12,"height":6,"properties":{"metrics":[["AWS/ApiGateway","4XXError","ApiName","${apiName}"]],"period":60,"stat":"Sum","region":"${AWS::Region}","title":"Api Gateway 4xxError"}},{"type":"metric","x":12,"y":0,"width":12,"height":6,"properties":{"metrics":[["AWS/ApiGateway","5XXError","ApiName","${apiName}"]],"period":60,"stat":"Sum","region":"${AWS::Region}","title":"Api Gateway 5xxError"}},{"type":"metric","x":0,"y":12,"width":12,"height":6,"properties":{"metrics":[["AWS/ApiGateway","IntegrationLatency","ApiName","${apiName}"]],"period":60,"stat":"Sum","region":"${AWS::Region}","title":"Api Gateway IntegrationLatency"}}]}'
+
+                                        
