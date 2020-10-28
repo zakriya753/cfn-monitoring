@@ -1,0 +1,135 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: cfn cloudwatch dynamo sns
+Parameters:
+  awsEnv:
+    Type: String
+    Default: playpen
+  appName:
+    Type: String
+  snsTopicAlarmArn:
+    Type: String
+  dynamoTableName:
+    Type: String
+  s3Bucket:
+    Type: String
+  s3LambdaKey:
+    Type: String          
+Resources:        
+  # Lambda policy
+  iamLambdaPolicy:
+    Type: AWS::IAM::ManagedPolicy
+    Properties:
+      Path: "/"
+      ManagedPolicyName: !Sub "${appName}-lambda-policy-${awsEnv}"
+      Description: !Sub "${appName}-lambda-policy-${awsEnv}"
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+        - Effect: Allow
+          Action: ["sns:Publish"]
+          Resource: "*"        
+  # Lambda Role    
+  iamLambdaRole:
+    Type: "AWS::IAM::Role"
+    Properties:
+      Path: "/"
+      RoleName: !Sub "${appName}-lambda-role-${awsEnv}"
+      ManagedPolicyArns:
+        - !Ref iamLambdaPolicy 
+        - arn:aws:iam::aws:policy/AmazonSNSReadOnlyAccess
+        - arn:aws:iam::aws:policy/AmazonDynamoDBReadOnlyAccess
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          -
+            Effect: "Allow"
+            Action: ['sts:AssumeRole']
+            Principal:
+              Service:  [lambda.amazonaws.com]
+      Tags:
+        - Key: "Name"
+          Value: !Sub ${appName}-lambda-role
+        - Key: "awsEnv"
+          Value: !Sub ${awsEnv}                
+# Lambda function
+  lambdaApp:
+    Type: AWS::Lambda::Function
+    DependsOn: [cwDynamo] 
+    Properties:
+      Code:
+        S3Bucket: !Ref s3Bucket
+        S3Key: !Ref s3LambdaKey
+      FunctionName: !Sub "${appName}-lambda-${awsEnv}"
+      Handler: "index.lambda_handler"
+      MemorySize: 128
+      Role: !GetAtt iamLambdaRole.Arn
+      Runtime: python3.7
+      Timeout: 60
+      Tags:
+      - Key: "Name"
+        Value: !Sub ${appName}-lambda
+      - Key: "awsEnv"
+        Value: !Sub ${awsEnv}
+  # Lambda Alarms
+  lambdaErrorAlert:
+    Type: 'AWS::CloudWatch::Alarm'
+    Properties:
+      AlarmName: !Sub ${appName}-lambda-error-${awsEnv}
+      AlarmDescription: !Sub ${appName}-lambda-error-${awsEnv}
+      AlarmActions:
+        - !Ref snsTopicAlarmArn
+      MetricName: "Errors"
+      Namespace: "AWS/Lambda"
+      Statistic: "Sum"
+      Period: 60
+      EvaluationPeriods: 5
+      Threshold: 0
+      ComparisonOperator: GreaterThanThreshold
+      Dimensions:
+        - Name: FunctionName
+          Value: !Ref lambdaApp
+  lambdaThrottleAlert:
+    Type: 'AWS::CloudWatch::Alarm'
+    Properties:
+      AlarmName: !Sub ${appName}-lambda-throttle-${awsEnv}
+      AlarmDescription: !Sub ${appName}-lambda-throttle-${awsEnv}
+      AlarmActions:
+        - !Ref snsTopicAlarmArn
+      MetricName: "Throttles"
+      Namespace: "AWS/Lambda"
+      Statistic: "Sum"
+      Period: 60
+      EvaluationPeriods: 5
+      Threshold: 0
+      ComparisonOperator: GreaterThanThreshold
+      Dimensions:
+        - Name: FunctionName
+          Value: !Ref lambdaApp                
+  cwDynamo:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      AttributeDefinitions:
+      - AttributeName: "AlarmName"
+        AttributeType: 'S'
+      TableName: !Sub "${dynamoTableName}"
+      KeySchema:
+      - AttributeName: "AlarmName"
+        KeyType: HASH
+      ProvisionedThroughput:
+        ReadCapacityUnits: 5
+        WriteCapacityUnits: 10
+      Tags:
+      - Key: "Name"
+        Value: !Sub ${appName}-dynamodb
+      - Key: "awsEnv"
+        Value: !Sub ${awsEnv}  
+Outputs:
+  dynamoDB:
+    Value: !Ref cwDynamo
+    Export:
+      Name: !Sub "${appName}-dynamo-${awsEnv}"
+  lambda:
+    Value: !Ref lambdaApp
+    Export:
+      Name: !Sub "${appName}-lambda-${awsEnv}"        
